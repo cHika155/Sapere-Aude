@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Sapere Aude</title>
+  <style>
+    /* 🌒 DARK ACADEMIA STYLE */
+    body {
+      font-family: "Times New Roman", serif;
+      background-color: #1d1c1a;
+      color: #e6dfd5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      transition: background 0.5s ease;
+    }
+
+    .screen {
+      text-align: center;
+      display: none;
+      max-width: 600px;
+      padding: 2rem;
+      background: rgba(35, 33, 30, 0.85);
+      border: 1px solid #6b5f52;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      animation: fadeIn 0.8s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    h1, h2 {
+      color: #d6c7b1;
+    }
+
+    p {
+      line-height: 1.6;
+    }
+
+    button {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background-color: #6b5f52;
+      color: #f5f0eb;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: "Times New Roman", serif;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #8b7c6e;
+    }
+
+    .option {
+      display: block;
+      margin: 10px 0;
+      padding: 12px;
+      border: 1px solid #8b7c6e;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .option:hover {
+      background-color: rgba(139, 124, 110, 0.3);
+    }
+
+    .option.selected {
+      background-color: #8b7c6e;
+      color: #fff;
+      transform: scale(1.02);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #result-text {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: #e6dfd5;
+    }
+  </style>
+</head>
+<body>
+  <!-- 🏛️ HOME SCREEN -->
+  <div id="home-screen" class="screen active">
+    <h1>🎓 Apakah Kamu Sudah Sapere Aude?</h1>
+    <p>Uji cara berpikirmu — apakah kamu sudah berani berpikir sendiri,<br>atau masih mengikuti arus?</p>
+    <button id="start-btn">Mulai Quiz</button>
+  </div>
+
+  <!-- 🧭 QUIZ SCREEN -->
+  <div id="quiz-screen" class="screen">
+    <div id="question-container"></div>
+    <button id="next-btn" style="display:none;">Pertanyaan Berikutnya</button>
+  </div>
+
+  <!-- 🧠 RESULT SCREEN -->
+  <div id="result-screen" class="screen">
+    <h2>Hasil Reflektifmu 🧠</h2>
+    <p id="result-text"></p>
+    <button id="restart-btn">Ulangi Quiz</button>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "Saat semua orang tertawa pada hal yang kamu tidak paham...",
+        options: [
+          { text: "A. Kamu ikut tertawa, biar tidak aneh.", points: 0 },
+          { text: "B. Kamu tersenyum kecil — pura-pura paham, tapi penasaran.", points: 1 },
+          { text: "C. Kamu diam saja. Rasanya lebih jujur begitu.", points: 2 }
+        ]
+      },
+      {
+        text: "Saat langit mendung dan kamu tidak tahu apakah hujan akan turun...",
+        options: [
+          { text: "A. Kamu langsung buka ponsel, cari perkiraannya.", points: 0 },
+          { text: "B. Kamu lihat ke langit, menebak lewat arah angin.", points: 1 },
+          { text: "C. Kamu tidak peduli, kadang basah juga bagian dari hari.", points: 2 }
+        ]
+      },
+      {
+        text: "Temanmu bilang, 'nggak usah terlalu mikir.' Kamu…",
+        options: [
+          { text: "A. Tertawa dan mengiyakan, walau otakmu belum berhenti juga.", points: 1 },
+          { text: "B. Berpikir lebih dalam justru karena kalimat itu.", points: 2 },
+          { text: "C. Diam saja — tahu kalau sebagian orang memang takut keheningan.", points: 2 }
+        ]
+      },
+      {
+        text: "Kamu menemukan catatan lama dengan tulisan tanganmu sendiri...",
+        options: [
+          { text: "A. Kamu buang saja, masa lalu sudah lewat.", points: 0 },
+          { text: "B. Kamu baca perlahan, mencoba mengenali dirimu di antara kata-kata.", points: 2 },
+          { text: "C. Kamu merasa sedikit takut — itu terasa bukan kamu yang sekarang.", points: 1 }
+        ]
+      },
+      {
+        text: "Saat orang berkata, 'hidup ini sederhana,' kamu merasa…",
+        options: [
+          { text: "A. Lega. Akhirnya ada yang membuat semuanya terdengar mudah.", points: 0 },
+          { text: "B. Bingung. Kalau sederhana, kenapa kamu masih bertanya-tanya?", points: 1 },
+          { text: "C. Tenang. Karena kamu tahu kesederhanaan bukan berarti mudah.", points: 2 }
+        ]
+      }
+    ];
+
+    let currentQuestion = 0;
+    let totalPoints = 0;
+
+    const homeScreen = document.getElementById("home-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionContainer = document.getElementById("question-container");
+    const nextBtn = document.getElementById("next-btn");
+    const startBtn = document.getElementById("start-btn");
+    const restartBtn = document.getElementById("restart-btn");
+
+    startBtn.addEventListener("click", () => {
+      homeScreen.classList.remove("active");
+      quizScreen.classList.add("active");
+      showQuestion();
+    });
+
+    restartBtn.addEventListener("click", () => {
+      resultScreen.classList.remove("active");
+      homeScreen.classList.add("active");
+      currentQuestion = 0;
+      totalPoints = 0;
+    });
+
+    function showQuestion() {
+      nextBtn.style.display = "none";
+      const q = questions[currentQuestion];
+      questionContainer.innerHTML = `
+        <h2>${q.text}</h2>
+        ${q.options
+          .map(
+            (opt, i) =>
+              `<div class="option" data-points="${opt.points}">${opt.text}</div>`
+          )
+          .join("")}
+      `;
+
+      document.querySelectorAll(".option").forEach(option => {
+        option.addEventListener("click", () => {
+          document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
+          option.classList.add("selected");
+          nextBtn.style.display = "block";
+          totalPoints += parseInt(option.dataset.points);
+        });
+      });
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    function showResult() {
+      quizScreen.classList.remove("active");
+      resultScreen.classList.add("active");
+
+      let resultText = "";
+      if (totalPoints <= 6) {
+        resultText = "🫣 <b>Ask First, Think Later</b><br> Cepat, praktis, tapi cenderung reaktif — lebih sering mencari jawaban daripada menemukan makna.";
+      } else if (totalPoints <= 11) {
+        resultText = "🔍 <b>Halfway Sapere Aude</b><br> Masih bolak-balik antara kenyamanan jawaban instan dan keinginan berpikir lebih dalam.";
+      } else {
+        resultText = "🧠 <b>True Sapere Aude Thinker</b><br> Reflektif, peka, dan berani menghadapi ketidakpastian. Menikmati berpikir, bukan sekadar hasilnya.";
+      }
+
+      document.getElementById("result-text").innerHTML = resultText;
+    }
+  </script>
+</body>
+</html>

@@ -23,7 +23,7 @@
       display: none;
       max-width: 600px;
       padding: 2rem;
-      background: rgba(35, 33, 30, 0.85);
+      background: rgba(35, 33, 30, 0.9);
       border: 1px solid #6b5f52;
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
@@ -79,6 +79,14 @@
       transform: scale(1.02);
     }
 
+    img {
+      width: 150px;
+      height: auto;
+      margin-bottom: 1rem;
+      border-radius: 50%;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -94,7 +102,8 @@
 <body>
   <!-- 🏛️ HOME SCREEN -->
   <div id="home-screen" class="screen active">
-    <h1>🎓 Apakah Kamu Sudah Sapere Aude?</h1>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Vintage_book_illustration.png" alt="Vintage Book">
+    <h1>🎓 Apakah Kamu Sudah <i>Sapere Aude?</i></h1>
     <p>Uji cara berpikirmu — apakah kamu sudah berani berpikir sendiri,<br>atau masih mengikuti arus?</p>
     <button id="start-btn">Mulai Quiz</button>
   </div>
@@ -102,14 +111,15 @@
   <!-- 🧭 QUIZ SCREEN -->
   <div id="quiz-screen" class="screen">
     <div id="question-container"></div>
-    <button id="next-btn" style="display:none;">Pertanyaan Berikutnya</button>
   </div>
 
   <!-- 🧠 RESULT SCREEN -->
   <div id="result-screen" class="screen">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Vintage_brain_illustration.png" alt="Brain Vintage">
     <h2>Hasil Reflektifmu 🧠</h2>
     <p id="result-text"></p>
     <button id="restart-btn">Ulangi Quiz</button>
+    <button id="share-btn">Bagikan ke IG Story 📸</button>
   </div>
 
   <script>
@@ -163,9 +173,9 @@
     const quizScreen = document.getElementById("quiz-screen");
     const resultScreen = document.getElementById("result-screen");
     const questionContainer = document.getElementById("question-container");
-    const nextBtn = document.getElementById("next-btn");
     const startBtn = document.getElementById("start-btn");
     const restartBtn = document.getElementById("restart-btn");
+    const shareBtn = document.getElementById("share-btn");
 
     startBtn.addEventListener("click", () => {
       homeScreen.classList.remove("active");
@@ -181,7 +191,6 @@
     });
 
     function showQuestion() {
-      nextBtn.style.display = "none";
       const q = questions[currentQuestion];
       questionContainer.innerHTML = `
         <h2>${q.text}</h2>
@@ -195,22 +204,20 @@
 
       document.querySelectorAll(".option").forEach(option => {
         option.addEventListener("click", () => {
-          document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
           option.classList.add("selected");
-          nextBtn.style.display = "block";
           totalPoints += parseInt(option.dataset.points);
+
+          setTimeout(() => {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+              showQuestion();
+            } else {
+              showResult();
+            }
+          }, 600);
         });
       });
     }
-
-    nextBtn.addEventListener("click", () => {
-      currentQuestion++;
-      if (currentQuestion < questions.length) {
-        showQuestion();
-      } else {
-        showResult();
-      }
-    });
 
     function showResult() {
       quizScreen.classList.remove("active");
@@ -218,18 +225,21 @@
 
       let resultText = "";
       if (totalPoints <= 6) {
-        resultText = "🫣 <b>Ask First, Think Later</b><br> Cepat, praktis, tapi cenderung reaktif — lebih sering mencari jawaban daripada menemukan makna.";
+        resultText = "🫣 <b>Ask First, Think Later</b><br>Cepat, praktis, tapi cenderung reaktif — lebih sering mencari jawaban daripada menemukan makna.";
       } else if (totalPoints <= 11) {
-        resultText = "🔍 <b>Halfway Sapere Aude</b><br> Masih bolak-balik antara kenyamanan jawaban instan dan keinginan berpikir lebih dalam.";
+        resultText = "🔍 <b>Halfway Sapere Aude</b><br>Masih bolak-balik antara kenyamanan jawaban instan dan keinginan berpikir lebih dalam.";
       } else {
-        resultText = "🧠 <b>True Sapere Aude Thinker</b><br> Reflektif, peka, dan berani menghadapi ketidakpastian. Menikmati berpikir, bukan sekadar hasilnya.";
+        resultText = "🧠 <b>True Sapere Aude Thinker</b><br>Reflektif, peka, dan berani menghadapi ketidakpastian. Menikmati berpikir, bukan sekadar hasilnya.";
       }
 
       document.getElementById("result-text").innerHTML = resultText;
     }
+
+    shareBtn.addEventListener("click", () => {
+      const text = encodeURIComponent("Aku baru coba Quiz 'Sapere Aude'! 🌙 Coba juga dan lihat kamu tipe pemikir yang mana ✨");
+      const url = encodeURIComponent(window.location.href);
+      window.open(`https://www.instagram.com/stories/create/?text=${text}%0A${url}`, "_blank");
+    });
   </script>
 </body>
 </html>
-
-<link rel="stylesheet" href="style.css">
-<script src="script.js"></script>
